@@ -389,7 +389,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                                                   val;
                                             });
                                           },
-                                    activeColor: AppColors.primary,
+                                    activeThumbColor: AppColors.primary,
                                   ),
                                 ],
                               ),
@@ -414,7 +414,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                                   .toList();
 
                               final record = DailyAttendance(
-                                id: '${dateKey}_${_selectedGrade}${_selectedArm != null ? "_$_selectedArm" : ""}',
+                                id: '${dateKey}_$_selectedGrade${_selectedArm != null ? "_$_selectedArm" : ""}',
                                 date: DateTime(
                                   _selectedDate.year,
                                   _selectedDate.month,
@@ -454,8 +454,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                                 );
                               }
                             } finally {
-                              if (mounted)
+                              if (mounted) {
                                 setState(() => _isSubmitting = false);
+                              }
                             }
                           },
                     style: ElevatedButton.styleFrom(

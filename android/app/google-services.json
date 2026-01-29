@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "247737180304",
+    "project_id": "easy-academia",
+    "storage_bucket": "easy-academia.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:247737180304:android:282baf51c37289681e7815",
+        "android_client_info": {
+          "package_name": "com.example.easy_academia"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhzJgf9HX2ultrVFKF7x7oBf5tdi95LJs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

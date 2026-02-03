@@ -16,6 +16,8 @@ import 'models/staff.dart';
 import 'models/student.dart';
 import 'models/activity.dart';
 import 'models/grade_record.dart';
+import 'models/school_config.dart';
+import 'models/staff_attendance.dart';
 import 'services/school_data_service.dart';
 
 void main() async {
@@ -31,6 +33,8 @@ void main() async {
   Hive.registerAdapter(ActivityStatusAdapter());
   Hive.registerAdapter(ActivityAdapter());
   Hive.registerAdapter(GradeRecordAdapter());
+  Hive.registerAdapter(SchoolConfigAdapter());
+  Hive.registerAdapter(StaffAttendanceAdapter());
 
   runApp(
     MultiProvider(

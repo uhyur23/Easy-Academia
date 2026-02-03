@@ -625,24 +625,25 @@ class _ParentHomeState extends State<ParentHome> {
                             style: AppTypography.body.copyWith(fontSize: 12),
                           ),
                           const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withAlpha(40),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              pos.ordinal,
-                              style: AppTypography.label.copyWith(
-                                fontSize: 10,
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.bold,
+                          if (service.schoolConfig?.showPositionInApp ?? true)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withAlpha(40),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                pos.ordinal,
+                                style: AppTypography.label.copyWith(
+                                  fontSize: 10,
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
                         ],
                       ),
                     ],
@@ -735,86 +736,92 @@ class _ParentHomeState extends State<ParentHome> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
-                // Subject Position
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withAlpha(20),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.primary.withAlpha(50)),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.emoji_events,
+                if (service.schoolConfig?.showPositionInApp ?? true) ...[
+                  const SizedBox(height: 20),
+                  // Subject Position
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withAlpha(20),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: AppColors.primary.withAlpha(50),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.emoji_events,
+                              color: AppColors.primary,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Subject Position',
+                                style: AppTypography.body.copyWith(
+                                  fontSize: 12,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          subjectPosition.displayText,
+                          style: AppTypography.label.copyWith(
                             color: AppColors.primary,
-                            size: 20,
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Subject Position',
-                              style: AppTypography.body.copyWith(
-                                fontSize: 12,
-                                color: Colors.white70,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                if (service.schoolConfig?.showPositionInApp ?? true) ...[
+                  const SizedBox(height: 12),
+                  // Overall Position
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.accent.withAlpha(20),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.accent.withAlpha(50)),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.stars,
+                              color: AppColors.accent,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Overall Position',
+                                style: AppTypography.body.copyWith(
+                                  fontSize: 12,
+                                  color: Colors.white70,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        subjectPosition.displayText,
-                        style: AppTypography.label.copyWith(
-                          color: AppColors.primary,
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                // Overall Position
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.accent.withAlpha(20),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.accent.withAlpha(50)),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.stars,
+                        const SizedBox(height: 4),
+                        Text(
+                          overallPosition.displayText,
+                          style: AppTypography.label.copyWith(
                             color: AppColors.accent,
-                            size: 20,
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Overall Position',
-                              style: AppTypography.body.copyWith(
-                                fontSize: 12,
-                                color: Colors.white70,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        overallPosition.displayText,
-                        style: AppTypography.label.copyWith(
-                          color: AppColors.accent,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),

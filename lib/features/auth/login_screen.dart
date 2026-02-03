@@ -53,13 +53,44 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (!success) {
       final error = context.read<AppState>().authError;
+      final isVerificationError = error?.contains('verify') ?? false;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(error ?? 'Invalid credentials or School ID'),
           backgroundColor: error != null ? Colors.redAccent : null,
+          action: isVerificationError
+              ? SnackBarAction(
+                  label: 'RESEND',
+                  textColor: Colors.white,
+                  onPressed: _handleResendVerification,
+                )
+              : null,
+          duration: isVerificationError
+              ? const Duration(seconds: 10)
+              : const Duration(seconds: 4),
         ),
       );
     }
+  }
+
+  Future<void> _handleResendVerification() async {
+    setState(() => _isLoading = true);
+    final error = await context.read<AppState>().resendVerificationEmail(
+      _usernameController.text,
+      _passwordController.text,
+    );
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          error ?? 'Verification email resent! Please check your inbox.',
+        ),
+        backgroundColor: error == null ? Colors.green : Colors.redAccent,
+      ),
+    );
   }
 
   @override

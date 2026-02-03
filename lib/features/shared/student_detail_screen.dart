@@ -365,6 +365,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
         reports: [reportData],
         schoolLogoBase64: appState.badgeUrl,
         schoolName: appState.schoolName ?? 'Easy Academia',
+        showPositions: service.schoolConfig?.showPositionOnReport ?? true,
       );
 
       final fileName = 'Report_${_currentStudent.name}_$term';
@@ -532,7 +533,9 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
           icon: Icons.calendar_today_rounded,
           color: AppColors.accent,
         ),
-        _buildOverallRankMetric(),
+        if (context.read<SchoolDataService>().schoolConfig?.showPositionInApp ??
+            true)
+          _buildOverallRankMetric(),
       ],
     );
   }
@@ -922,22 +925,25 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Rank: ${pos.ordinal}',
-                            style: AppTypography.body.copyWith(
-                              fontSize: 11,
-                              color: Colors.orangeAccent,
-                              fontWeight: FontWeight.w500,
+                          if (service.schoolConfig?.showPositionInApp ?? true)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(
+                                'Rank: ${pos.ordinal}',
+                                style: AppTypography.body.copyWith(
+                                  fontSize: 11,
+                                  color: Colors.orangeAccent,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ],
                   ),
                 ),
               );
-            }).toList(),
+            }),
           ],
         ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.1);
       },

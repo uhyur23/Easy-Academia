@@ -69,13 +69,21 @@ class AppState extends ChangeNotifier {
             (e) => e.name == data['role'],
             orElse: () => UserRole.admin,
           );
-          _schoolId = data['schoolId']?.toString().toUpperCase();
-          _userName = data['name'];
-          _linkedStudentIds = List<String>.from(data['linkedStudents'] ?? []);
 
-          // Fetch School Profile
-          if (_schoolId != null) {
-            await _fetchSchoolProfile();
+          // Check if email is verified for roles that use it
+          if (_activeRole != UserRole.staff && !user.emailVerified) {
+            _authError = 'Please verify your email to continue.';
+            await _auth.signOut();
+            _resetState();
+          } else {
+            _schoolId = data['schoolId']?.toString().toUpperCase();
+            _userName = data['name'];
+            _linkedStudentIds = List<String>.from(data['linkedStudents'] ?? []);
+
+            // Fetch School Profile
+            if (_schoolId != null) {
+              await _fetchSchoolProfile();
+            }
           }
         }
       }
@@ -134,6 +142,12 @@ class AppState extends ChangeNotifier {
           );
 
           if (credentials.user != null) {
+            if (!credentials.user!.emailVerified) {
+              _authError = 'Email not verified. Please check your inbox.';
+              await _auth.signOut();
+              return false;
+            }
+
             final doc = await _firestore
                 .collection('users')
                 .doc(credentials.user!.uid)
@@ -221,6 +235,23 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  Future<String?> resendVerificationEmail(String email, String password) async {
+    try {
+      final credentials = await _auth.signInWithEmailAndPassword(
+        email: email.trim(),
+        password: password.trim(),
+      );
+      if (credentials.user != null && !credentials.user!.emailVerified) {
+        await credentials.user!.sendEmailVerification();
+        await _auth.signOut();
+        return null;
+      }
+      return 'User already verified or not found.';
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
   Future<String?> signUp({
     required String email,
     required String password,
@@ -235,54 +266,65 @@ class AppState extends ChangeNotifier {
       );
 
       if (credentials.user != null) {
-        String schoolId;
+        try {
+          // Send email verification
+          await credentials.user!.sendEmailVerification();
 
-        if (role == UserRole.admin) {
-          // Generate a new School ID for new schools
-          schoolId =
-              'SCH-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
+          String schoolId;
 
-          // Create School Profile
-          await _firestore.collection('schools').doc(schoolId).set({
-            'name': schoolName ?? 'New School',
-            'createdAt': FieldValue.serverTimestamp(),
-            'adminEmail': email,
+          if (role == UserRole.admin) {
+            // Generate a new School ID for new schools
+            schoolId =
+                'SCH-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
+
+            // Create School Profile
+            await _firestore.collection('schools').doc(schoolId).set({
+              'name': schoolName ?? 'New School',
+              'createdAt': FieldValue.serverTimestamp(),
+              'adminEmail': email,
+            });
+          } else {
+            // For parents, use the provided School ID
+            if (existingSchoolId == null || existingSchoolId.isEmpty) {
+              await credentials.user!.delete();
+              return 'School ID is required for parent registration';
+            }
+            schoolId = existingSchoolId.toUpperCase();
+
+            // Verify school exists
+            final schoolDoc = await _firestore
+                .collection('schools')
+                .doc(schoolId)
+                .get();
+            if (!schoolDoc.exists) {
+              await credentials.user!.delete();
+              return 'Invalid School ID. Please check with your school.';
+            }
+          }
+
+          // Create User Profile
+          await _firestore.collection('users').doc(credentials.user!.uid).set({
+            'role': role.name,
+            'schoolId': schoolId,
+            'email': email,
+            'name': role == UserRole.admin ? 'Administrator' : 'Parent',
+            'linkedStudents': [],
           });
-        } else {
-          // For parents, use the provided School ID
-          if (existingSchoolId == null || existingSchoolId.isEmpty) {
-            return 'School ID is required for parent registration';
+
+          // Update local state for immediate feedback
+          _schoolId = schoolId;
+          if (role == UserRole.admin) {
+            _schoolName = schoolName;
+          } else {
+            await _fetchSchoolProfile();
           }
-          schoolId = existingSchoolId.toUpperCase();
 
-          // Verify school exists
-          final schoolDoc = await _firestore
-              .collection('schools')
-              .doc(schoolId)
-              .get();
-          if (!schoolDoc.exists) {
-            return 'Invalid School ID. Please check with your school.';
-          }
+          return null; // Success
+        } catch (e) {
+          debugPrint('Inner Signup Error (Cleaning up): $e');
+          await credentials.user!.delete();
+          rethrow;
         }
-
-        // Create User Profile
-        await _firestore.collection('users').doc(credentials.user!.uid).set({
-          'role': role.name,
-          'schoolId': schoolId,
-          'email': email,
-          'name': role == UserRole.admin ? 'Administrator' : 'Parent',
-          'linkedStudents': [],
-        });
-
-        // Update local state for immediate feedback
-        _schoolId = schoolId;
-        if (role == UserRole.admin) {
-          _schoolName = schoolName;
-        } else {
-          await _fetchSchoolProfile();
-        }
-
-        return null; // Success
       }
       return 'User creation failed';
     } catch (e) {

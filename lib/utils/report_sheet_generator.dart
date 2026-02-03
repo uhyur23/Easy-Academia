@@ -10,6 +10,7 @@ class ReportSheetGenerator {
     required List<StudentReportData> reports,
     String? schoolLogoBase64,
     required String schoolName,
+    bool showPositions = true,
   }) async {
     final pdf = pw.Document();
 
@@ -145,12 +146,13 @@ class ReportSheetGenerator {
                               font,
                               fontBold,
                             ),
-                            _buildInfoRow(
-                              'Position:',
-                              report.overallPosition.displayText,
-                              font,
-                              fontBold,
-                            ),
+                            if (showPositions)
+                              _buildInfoRow(
+                                'Position:',
+                                report.overallPosition.displayText,
+                                font,
+                                fontBold,
+                              ),
                           ],
                         ),
                       ),
@@ -178,7 +180,8 @@ class ReportSheetGenerator {
                           ),
                           _buildTableCell('TOTAL', fontBold, isHeader: true),
                           _buildTableCell('GRADE', fontBold, isHeader: true),
-                          _buildTableCell('POS', fontBold, isHeader: true),
+                          if (showPositions)
+                            _buildTableCell('POS', fontBold, isHeader: true),
                           _buildTableCell('REMARK', fontBold, isHeader: true),
                         ],
                       ),
@@ -198,7 +201,8 @@ class ReportSheetGenerator {
                               fontBold,
                             ),
                             _buildTableCell(g.grade, fontBold),
-                            _buildTableCell(position?.ordinal ?? '-', font),
+                            if (showPositions)
+                              _buildTableCell(position?.ordinal ?? '-', font),
                             _buildTableCell(_getRemark(g.grade), font),
                           ],
                         );

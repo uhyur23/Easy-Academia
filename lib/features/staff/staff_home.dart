@@ -6,6 +6,7 @@ import '../../core/user_role.dart';
 import '../../core/design_system.dart';
 import '../../services/school_data_service.dart';
 import '../../models/activity.dart';
+import '../../models/staff_attendance.dart';
 import 'attendance_screen.dart';
 import 'grade_entry_screen.dart';
 import 'activity_history_screen.dart';
@@ -89,6 +90,8 @@ class StaffHome extends StatelessWidget {
                   context.read<AppState>().userName,
                   activities.length,
                 ),
+                const SizedBox(height: 24),
+                _buildAttendanceCard(context, service, state),
                 const SizedBox(height: 32),
                 _buildQuickActions(context),
                 const SizedBox(height: 32),
@@ -266,6 +269,85 @@ class StaffHome extends StatelessWidget {
         ).animate().fadeIn(delay: 200.ms),
       ],
     );
+  }
+
+  Widget _buildAttendanceCard(
+    BuildContext context,
+    SchoolDataService service,
+    AppState state,
+  ) {
+    final staffId = state.userId ?? '';
+    final hasClockedIn = service.hasStaffClockedIn(staffId, DateTime.now());
+    final attendanceRecords = hasClockedIn
+        ? service
+              .getDailyStaffAttendance(DateTime.now())
+              .where((a) => a.staffId == staffId)
+              .toList()
+        : <StaffAttendance>[];
+    final attendanceRecord = attendanceRecords.isNotEmpty
+        ? attendanceRecords.first
+        : null;
+
+    return GlassContainer(
+      padding: const EdgeInsets.all(20),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: hasClockedIn
+                  ? Colors.green.withAlpha(40)
+                  : AppColors.primary.withAlpha(40),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              hasClockedIn ? Icons.check_circle_rounded : Icons.timer_rounded,
+              color: hasClockedIn ? Colors.green : AppColors.primary,
+              size: 28,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  hasClockedIn ? 'Already Clocked In' : 'Daily Attendance',
+                  style: AppTypography.label.copyWith(fontSize: 18),
+                ),
+                Text(
+                  hasClockedIn && attendanceRecord != null
+                      ? 'Arrival Time: ${attendanceRecord.timestamp.hour.toString().padLeft(2, '0')}:${attendanceRecord.timestamp.minute.toString().padLeft(2, '0')}'
+                      : 'Record your arrival time for today.',
+                  style: AppTypography.body.copyWith(color: Colors.white70),
+                ),
+              ],
+            ),
+          ),
+          if (!hasClockedIn)
+            ElevatedButton(
+              onPressed: () async {
+                final staff = service
+                    .getStaffForSchool(state.schoolId!)
+                    .firstWhere((s) => s.id == staffId);
+                await service.clockInStaff(staff);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Clocked in successfully!')),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text('Clock In'),
+            ),
+        ],
+      ),
+    ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1);
   }
 
   Widget _buildQuickActions(BuildContext context) {

@@ -73,9 +73,11 @@ class _SignupScreenState extends State<SignupScreen> {
         SnackBar(
           content: Text(
             _selectedRole == UserRole.admin
-                ? 'School registered successfully! Please login.'
-                : 'Account created successfully! Please login.',
+                ? 'School registered! Please check your inbox (and spam folder) for a verification link.'
+                : 'Account created! Please verify your email (check spam folder) to log in.',
           ),
+          duration: const Duration(seconds: 12),
+          action: SnackBarAction(label: 'OK', onPressed: () {}),
         ),
       );
     } else {

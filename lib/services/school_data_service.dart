@@ -11,6 +11,8 @@ import '../models/grade_record.dart';
 import '../models/daily_attendance.dart';
 import '../models/student_report_data.dart';
 import '../models/subject.dart';
+import '../models/school_config.dart';
+import '../models/staff_attendance.dart';
 import '../utils/position_calculator.dart';
 
 class SchoolDataService extends ChangeNotifier {
@@ -24,6 +26,8 @@ class SchoolDataService extends ChangeNotifier {
   List<GradeRecord> _grades = [];
   List<DailyAttendance> _attendanceRecords = [];
   List<Subject> _subjects = [];
+  SchoolConfig? _schoolConfig;
+  List<StaffAttendance> _staffAttendance = [];
   final List<StreamSubscription> _subscriptions = [];
   String? _currentSchoolId;
 
@@ -156,6 +160,34 @@ class SchoolDataService extends ChangeNotifier {
             notifyListeners();
           }, onError: (e) => debugPrint('Subjects listen error: $e')),
     );
+
+    // School Config Listener
+    _subscriptions.add(
+      _firestore.collection('school_config').doc(schoolId).snapshots().listen((
+        snapshot,
+      ) {
+        if (snapshot.exists && snapshot.data() != null) {
+          _schoolConfig = SchoolConfig.fromMap(snapshot.data()!);
+        } else {
+          _schoolConfig = SchoolConfig(schoolId: schoolId);
+        }
+        notifyListeners();
+      }, onError: (e) => debugPrint('School Config listen error: $e')),
+    );
+
+    // Staff Attendance Listener
+    _subscriptions.add(
+      _firestore
+          .collection('staff_attendance')
+          .where('schoolId', isEqualTo: schoolId)
+          .snapshots()
+          .listen((snapshot) {
+            _staffAttendance = snapshot.docs
+                .map((doc) => StaffAttendance.fromMap(doc.data()))
+                .toList();
+            notifyListeners();
+          }, onError: (e) => debugPrint('Staff Attendance listen error: $e')),
+    );
   }
 
   void _clearSubscriptions() {
@@ -176,6 +208,8 @@ class SchoolDataService extends ChangeNotifier {
     _grades = [];
     _attendanceRecords = [];
     _subjects = [];
+    _schoolConfig = null;
+    _staffAttendance = [];
     _isInitialized = false;
     notifyListeners();
   }
@@ -260,6 +294,20 @@ class SchoolDataService extends ChangeNotifier {
     return _subjects
         .where((s) => s.schoolId.toUpperCase() == schoolId.toUpperCase())
         .toList();
+  }
+
+  SchoolConfig? get schoolConfig => _schoolConfig;
+
+  List<StaffAttendance> getDailyStaffAttendance(DateTime date) {
+    final dateKey = "${date.year}-${date.month}-${date.day}";
+    return _staffAttendance.where((a) => a.id.startsWith(dateKey)).toList();
+  }
+
+  bool hasStaffClockedIn(String staffId, DateTime date) {
+    final dateKey = "${date.year}-${date.month}-${date.day}";
+    return _staffAttendance.any(
+      (a) => a.staffId == staffId && a.id.startsWith(dateKey),
+    );
   }
 
   DailyAttendance? getAttendanceRecord(
@@ -636,5 +684,33 @@ class SchoolDataService extends ChangeNotifier {
     }
 
     return reports;
+  }
+
+  // School Config Actions
+  Future<void> updateSchoolConfig(SchoolConfig config) async {
+    await _firestore
+        .collection('school_config')
+        .doc(config.schoolId)
+        .set(config.toMap());
+  }
+
+  // Staff Attendance Actions
+  Future<void> clockInStaff(Staff staff) async {
+    final now = DateTime.now();
+    final dateKey = "${now.year}-${now.month}-${now.day}";
+    final id = "${dateKey}_${staff.id}";
+
+    final attendance = StaffAttendance(
+      id: id,
+      staffId: staff.id,
+      staffName: staff.name,
+      schoolId: staff.schoolId,
+      timestamp: now,
+    );
+
+    await _firestore
+        .collection('staff_attendance')
+        .doc(id)
+        .set(attendance.toMap());
   }
 }

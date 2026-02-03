@@ -52,7 +52,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 DropdownButtonFormField<String>(
-                  value: selectedType,
+                  initialValue: selectedType,
                   dropdownColor: AppColors.surface,
                   decoration: const InputDecoration(
                     labelText: 'Announcement Type',
@@ -129,6 +129,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
     const IncomeHistorySection(),
     const PerformanceReportsSection(),
     const SubjectManagementSection(),
+    const StaffAttendanceLogSection(),
+    const SchoolSettingsSection(),
   ];
 
   Future<void> _handleBadgeUpload() async {
@@ -218,50 +220,70 @@ class _AdminDashboardState extends State<AdminDashboard> {
           ),
         ),
         const SizedBox(height: 40),
-        _SidebarItem(
-          icon: Icons.dashboard_rounded,
-          label: 'Dashboard',
-          isSelected: _selectedIndex == 0,
-          onTap: () => setState(() => _selectedIndex = 0),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                _SidebarItem(
+                  icon: Icons.dashboard_rounded,
+                  label: 'Dashboard',
+                  isSelected: _selectedIndex == 0,
+                  onTap: () => setState(() => _selectedIndex = 0),
+                ),
+                _SidebarItem(
+                  icon: Icons.people_rounded,
+                  label: 'Staff Management',
+                  isSelected: _selectedIndex == 1,
+                  onTap: () => setState(() => _selectedIndex = 1),
+                ),
+                _SidebarItem(
+                  icon: Icons.person_rounded,
+                  label: 'Student Directory',
+                  isSelected: _selectedIndex == 2,
+                  onTap: () => setState(() => _selectedIndex = 2),
+                ),
+                _SidebarItem(
+                  icon: Icons.account_balance_wallet_rounded,
+                  label: 'Income & Finance',
+                  isSelected: _selectedIndex == 3,
+                  onTap: () => setState(() => _selectedIndex = 3),
+                ),
+                _SidebarItem(
+                  icon: Icons.analytics_rounded,
+                  label: 'Performance Reports',
+                  isSelected: _selectedIndex == 4,
+                  onTap: () => setState(() => _selectedIndex = 4),
+                ),
+                _SidebarItem(
+                  icon: Icons.menu_book_rounded,
+                  label: 'Subject Management',
+                  isSelected: _selectedIndex == 5,
+                  onTap: () => setState(() => _selectedIndex = 5),
+                ),
+                _SidebarItem(
+                  icon: Icons.how_to_reg_rounded,
+                  label: 'Staff Attendance',
+                  isSelected: _selectedIndex == 6,
+                  onTap: () => setState(() => _selectedIndex = 6),
+                ),
+                const Divider(color: Colors.white10, indent: 24, endIndent: 24),
+                _SidebarItem(
+                  icon: Icons.settings_rounded,
+                  label: 'School Settings',
+                  isSelected: _selectedIndex == 7,
+                  onTap: () => setState(() => _selectedIndex = 7),
+                ),
+              ],
+            ),
+          ),
         ),
-        _SidebarItem(
-          icon: Icons.people_rounded,
-          label: 'Staff Management',
-          isSelected: _selectedIndex == 1,
-          onTap: () => setState(() => _selectedIndex = 1),
-        ),
-        _SidebarItem(
-          icon: Icons.person_rounded,
-          label: 'Student Directory',
-          isSelected: _selectedIndex == 2,
-          onTap: () => setState(() => _selectedIndex = 2),
-        ),
-        _SidebarItem(
-          icon: Icons.account_balance_wallet_rounded,
-          label: 'Income & Finance',
-          isSelected: _selectedIndex == 3,
-          onTap: () => setState(() => _selectedIndex = 3),
-        ),
-        _SidebarItem(
-          icon: Icons.analytics_rounded,
-          label: 'Performance Reports',
-          isSelected: _selectedIndex == 4,
-          onTap: () => setState(() => _selectedIndex = 4),
-        ),
-        _SidebarItem(
-          icon: Icons.menu_book_rounded,
-          label: 'Subject Management',
-          isSelected: _selectedIndex == 5,
-          onTap: () => setState(() => _selectedIndex = 5),
-        ),
-        const Spacer(),
         _SidebarItem(
           icon: Icons.logout_rounded,
           label: 'Logout',
           isSelected: false,
           onTap: () => _showLogoutDialog(context),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 12),
       ],
     );
   }
@@ -485,7 +507,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 DropdownButtonFormField<String>(
-                  value: selectedCategory,
+                  initialValue: selectedCategory,
                   dropdownColor: AppColors.surface,
                   style: const TextStyle(color: Colors.white),
                   decoration: const InputDecoration(
@@ -1243,7 +1265,7 @@ class StudentDirectorySection extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
-                    value: selectedSection,
+                    initialValue: selectedSection,
                     dropdownColor: AppColors.surface,
                     style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(labelText: 'Section'),
@@ -1259,7 +1281,7 @@ class StudentDirectorySection extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
-                    value: selectedClass,
+                    initialValue: selectedClass,
                     dropdownColor: AppColors.surface,
                     style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
@@ -1273,7 +1295,7 @@ class StudentDirectorySection extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
-                    value: selectedArm,
+                    initialValue: selectedArm,
                     dropdownColor: AppColors.surface,
                     style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
@@ -2356,6 +2378,250 @@ class SubjectManagementSection extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class StaffAttendanceLogSection extends StatefulWidget {
+  const StaffAttendanceLogSection({super.key});
+
+  @override
+  State<StaffAttendanceLogSection> createState() =>
+      _StaffAttendanceLogSectionState();
+}
+
+class _StaffAttendanceLogSectionState extends State<StaffAttendanceLogSection> {
+  DateTime _selectedDate = DateTime.now();
+
+  @override
+  Widget build(BuildContext context) {
+    final schoolId = context.watch<AppState>().schoolId ?? '';
+    return Consumer<SchoolDataService>(
+      builder: (context, service, _) {
+        final allStaff = service.getStaffForSchool(schoolId);
+        final attendance = service.getDailyStaffAttendance(_selectedDate);
+
+        return Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Staff Attendance Log', style: AppTypography.header),
+                      Text(
+                        'Viewing records for ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+                        style: AppTypography.body.copyWith(
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: _selectedDate,
+                        firstDate: DateTime(2025),
+                        lastDate: DateTime.now(),
+                      );
+                      if (picked != null) {
+                        setState(() => _selectedDate = picked);
+                      }
+                    },
+                    icon: const Icon(Icons.calendar_today_rounded, size: 18),
+                    label: const Text('Change Date'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      side: const BorderSide(color: Colors.white24),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Expanded(
+                child: GlassContainer(
+                  child: ListView.separated(
+                    itemCount: allStaff.length,
+                    separatorBuilder: (_, __) =>
+                        Divider(color: Colors.white.withAlpha(5)),
+                    itemBuilder: (context, index) {
+                      final staff = allStaff[index];
+                      final record =
+                          attendance.any((a) => a.staffId == staff.id)
+                          ? attendance.firstWhere((a) => a.staffId == staff.id)
+                          : null;
+
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: record != null
+                              ? Colors.green.withAlpha(40)
+                              : Colors.white.withAlpha(10),
+                          child: Icon(
+                            record != null
+                                ? Icons.check_circle_rounded
+                                : Icons.person_off_rounded,
+                            color: record != null
+                                ? Colors.green
+                                : Colors.white38,
+                            size: 20,
+                          ),
+                        ),
+                        title: Text(staff.name, style: AppTypography.label),
+                        subtitle: Text(
+                          staff.subject ??
+                              (staff.subjects.isNotEmpty
+                                  ? staff.subjects.join(', ')
+                                  : 'No Subject'),
+                          style: AppTypography.body.copyWith(fontSize: 12),
+                        ),
+                        trailing: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: record != null
+                                    ? Colors.green.withAlpha(40)
+                                    : Colors.red.withAlpha(40),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                record != null ? 'PRESENT' : 'NOT CLOCKED IN',
+                                style: TextStyle(
+                                  color: record != null
+                                      ? Colors.greenAccent
+                                      : Colors.redAccent,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            if (record != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(
+                                  'Time: ${record.timestamp.hour.toString().padLeft(2, '0')}:${record.timestamp.minute.toString().padLeft(2, '0')}',
+                                  style: const TextStyle(
+                                    color: Colors.white38,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class SchoolSettingsSection extends StatelessWidget {
+  const SchoolSettingsSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<SchoolDataService>(
+      builder: (context, service, _) {
+        final config = service.schoolConfig;
+
+        if (config == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        return Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('School Settings', style: AppTypography.header),
+              Text(
+                'Configure school-wide preferences and report behavior.',
+                style: AppTypography.body.copyWith(color: Colors.white70),
+              ),
+              const SizedBox(height: 32),
+              GlassContainer(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  children: [
+                    _buildSettingToggle(
+                      title: 'Show Class Position on Reports',
+                      subtitle:
+                          'When enabled, the final PDF report sheets will display Subject and Overall rankings.',
+                      value: config.showPositionOnReport,
+                      onChanged: (val) {
+                        service.updateSchoolConfig(
+                          config.copyWith(showPositionOnReport: val),
+                        );
+                      },
+                    ),
+                    const Divider(color: Colors.white10, height: 40),
+                    _buildSettingToggle(
+                      title: 'Enable Rankings in App',
+                      subtitle:
+                          'Allow parents to see their child\'s position for individual subjects in the dashboard.',
+                      value: config.showPositionInApp,
+                      onChanged: (val) {
+                        service.updateSchoolConfig(
+                          config.copyWith(showPositionInApp: val),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSettingToggle({
+    required String title,
+    required String subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: AppTypography.label.copyWith(fontSize: 16)),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: AppTypography.body.copyWith(
+                  fontSize: 12,
+                  color: Colors.white60,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Switch(
+          value: value,
+          onChanged: onChanged,
+          activeThumbColor: AppColors.primary,
+        ),
+      ],
     );
   }
 }
